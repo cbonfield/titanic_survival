@@ -65,9 +65,7 @@ def hyperparameter_tuning(classifier, param_dist, n_iterations, X, y):
     random_search = RandomizedSearchCV(clf, param_distributions=param_dist,
                                        n_iter=n_iterations, n_jobs=-1)
     random_search.fit(X, y)
-    results = random_search.cv_results_
-    best_loc = int(results['rank_test_score'] == 1)
-    best_params = results['params'][best_loc]
+    best_params = random_search.best_params_
     return best_params
 
 # Generate out-of-fold predictions for training set. For each fold, generate
