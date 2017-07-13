@@ -61,7 +61,8 @@ class Sklearn_Helper(object):
 # Perform hyperparameter tuning for given training set (will do this implicitly
 # for every fold).  
 def hyperparameter_tuning(classifier, param_dist, n_iterations, X, y):
-    random_search = RandomizedSearchCV(classifier, param_distributions=param_dist,
+    clf = classifier()
+    random_search = RandomizedSearchCV(clf, param_distributions=param_dist,
                                        n_iter=n_iterations, n_jobs=-1)
     random_search.fit(X, y)
     results = random_search.cv_results_
