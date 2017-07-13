@@ -22,7 +22,8 @@ from titanic_preprocessing import Useful_Preprocessing # conglomeration of stuff
 # these)
 from sklearn.svm import SVC
 from sklearn.cross_validation import KFold
-from sklearn.model_selection import RandomizedSearchCV
+from sklearn.grid_search import RandomizedSearchCV # old sklearn
+#from sklearn.model_selection import RandomizedSearchCV # new sklearn
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier, ExtraTreesClassifier
 
