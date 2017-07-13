@@ -81,7 +81,7 @@ class Useful_Preprocessing(object):
         return data
     
     # Impute missing ages using MICE.
-    def impute_ages(data):
+    def impute_ages(self, data):
         drop_survived = data.drop(['Survived'], axis=1)
         column_titles = list(drop_survived)
         mice_results = fancyimpute.MICE().complete(np.array(drop_survived))
