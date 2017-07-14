@@ -73,7 +73,7 @@ def hyperparameter_tuning(classifier, param_dist, n_iterations, X, y):
 def get_out_of_fold_predictions(classifier, param_dist, kf, n_folds, x_train, 
                                 y_train, n_train, x_test, n_test, seed):
     oof_train = np.zeros((n_train,))
-    oof_test = np.zeros((n_test,))
+    meta_test = np.zeros((n_test,))
     oof_test_full = np.empty((n_folds, n_test))
 
     # Iterate over sets of training/test indices corresponding to each fold.
@@ -92,10 +92,13 @@ def get_out_of_fold_predictions(classifier, param_dist, kf, n_folds, x_train,
         oof_train[test_indices] = clf.predict(x_te)
         oof_test_full[i, :] = clf.predict(x_test)
     
-    # Take the average prediction of all folds to be our "meta feature" for
-    # the actual test set.
-    oof_test[:] = oof_test_full.mean(axis=0)
-    return oof_train.reshape(-1, 1), oof_test.reshape(-1, 1)
+    # Generate predictions for actual test set (use entire training set). 
+    best_params = hyperparameter_tuning(classifier, param_dist, 50, x_train, y_train)
+    clf = Sklearn_Helper(classifier, seed=seed, params=best_params)
+    clf.train(x_train, y_train)
+    meta_test[:] = clf.predict(x_test)
+    
+    return oof_train.reshape(-1, 1), meta_test.reshape(-1, 1)
 
 # Load in data. 
 train_data = pd.read_csv('train.csv')
