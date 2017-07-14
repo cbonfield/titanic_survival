@@ -152,17 +152,17 @@ x_test = test_data.values
 svc_dist = {'C': scipy.stats.uniform(0.1,1000), 
             'gamma': scipy.stats.uniform(.001,1.0),
             'kernel': ['rbf'], 'class_weight':['balanced', None]} 
-ada_dist = {'n_estimators': scipy.stats.uniform(1,100),
+ada_dist = {'n_estimators': scipy.stats.randint(1,101),
             'learning_rate': scipy.stats.uniform(.001,1.0)}
-rf_dist = {'n_estimators': scipy.stats.uniform(1,100), 'warm_start': [True],
-           'max_depth': scipy.stats.uniform(2.0,6.0), 
-           'min_samples_leaf': scipy.stats.uniform(1.0,3.0)}
-gb_dist = {'n_estimators': scipy.stats.uniform(1,100), 'warm_start': [True],
-           'max_depth': scipy.stats.uniform(2.0,6.0), 
-           'min_samples_leaf': scipy.stats.uniform(1.0,3.0)}
-et_dist = {'n_estimators': scipy.stats.uniform(1,100), 'warm_start': [True],
-           'max_depth': scipy.stats.uniform(2.0,6.0), 
-           'min_samples_leaf': scipy.stats.uniform(1.0,3.0)}
+rf_dist = {'n_estimators': scipy.stats.randint(1,101), 'warm_start': [True],
+           'max_depth': scipy.stats.randint(2,7), 
+           'min_samples_leaf': scipy.stats.randint(1,4)}
+gb_dist = {'n_estimators': scipy.stats.randint(1,101), 'warm_start': [True],
+           'max_depth': scipy.stats.randint(2,7), 
+           'min_samples_leaf': scipy.stats.randint(1,4)}
+et_dist = {'n_estimators': scipy.stats.randint(1,101), 'warm_start': [True],
+           'max_depth': scipy.stats.randint(2,7), 
+           'min_samples_leaf': scipy.stats.randint(1,4)}
 
 # Generate first-level predictions. 
 # Arguments: (classifer, param_dist, kf, n_folds, x_train, y_train, n_train, 
@@ -188,6 +188,7 @@ et_fl_train, et_fl_test = get_out_of_fold_predictions(ExtraTreesClassifier,
                                                       y_train, n_train, x_test, 
                                                       n_test, SEED)
 
+"""
 # Save results, will be fed into second level. 
 x_train_meta = np.concatenate((svc_fl_train,ada_fl_train,rf_fl_train,gb_fl_train,
                                et_fl_train), axis=1)
@@ -195,3 +196,4 @@ x_test_meta = np.concatenate((svc_fl_test,ada_fl_test,rf_fl_test,gb_fl_test,
                               et_fl_test), axis=1)
 x_train_meta.dump('meta_train.dat')
 x_test_meta.dump('meta_test.dat')
+"""
