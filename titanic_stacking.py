@@ -23,6 +23,7 @@ from sklearn.svm import SVC
 from sklearn.cross_validation import KFold
 from sklearn.grid_search import RandomizedSearchCV # old sklearn
 #from sklearn.model_selection import RandomizedSearchCV # new sklearn
+#from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier, ExtraTreesClassifier
 
@@ -141,6 +142,8 @@ y_train = train_data['Survived'].ravel()
 train_data = train_data.drop(['Survived'], axis=1)
 x_train = train_data.values 
 x_test = test_data.values
+"""
+#UNCOMMENT IF YOU WISH TO GENERATE FIRST-LEVEL PREDICTIONS.
 
 # Provide set of parameter distributions to be searched by RandomSearchCV
 # for each classifer (needed for tuning, can be customized).
@@ -194,5 +197,10 @@ x_train_meta = np.concatenate((svc_fl_train,ada_fl_train,rf_fl_train,gb_fl_train
                                et_fl_train), axis=1)
 x_test_meta = np.concatenate((svc_fl_test,ada_fl_test,rf_fl_test,gb_fl_test,
                               et_fl_test), axis=1)
-x_train_meta.dump('meta_train.dat')
-x_test_meta.dump('meta_test.dat')
+np.savetxt('meta_train.txt', x_train_meta)
+np.savetxt('meta_test.txt', x_test_meta)
+"""
+
+# Load in first-level predictions for train/test sets. 
+x_train_meta = np.loadtxt('meta_train.txt')
+x_test_meta = np.loadtxt('meta_test.txt')
