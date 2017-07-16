@@ -39,6 +39,13 @@ class Useful_Preprocessing(object):
 
         return data
     
+    # Create new feature 'Family_Size', taken as the sum of parents/children
+    # and siblings/spouses. Also create 'Is_Alone'. 
+    def family_size(self, data):
+        data['Family_Size'] = data['SibSp'] + data['Parch'] + 1
+        data['Is_Alone'] = data['Family_Size'].apply(lambda x: 1 if x == 1 else 0)
+        return data
+    
     # Recast port of departure as numerical feature.
     def simplify_embark(self, data):
         # Two missing values, assign the most common port of departure.
@@ -75,6 +82,7 @@ class Useful_Preprocessing(object):
     def transform_all(self, data):
         data = self.simplify_cabins(data)
         data = self.simplify_sex(data)
+        data = self.family_size(data)
         data = self.simplify_embark(data)
         data = self.add_title(data)
         data = self.drop_features(data)

@@ -21,8 +21,8 @@ from titanic_preprocessing import Useful_Preprocessing # conglomeration of stuff
 # these)
 from sklearn.svm import SVC
 from sklearn.cross_validation import KFold
-from sklearn.grid_search import RandomizedSearchCV # old sklearn
-#from sklearn.model_selection import RandomizedSearchCV # new sklearn
+#from sklearn.grid_search import RandomizedSearchCV # old sklearn
+from sklearn.model_selection import RandomizedSearchCV # new sklearn
 #from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.ensemble import RandomForestClassifier, AdaBoostClassifier
 from sklearn.ensemble import GradientBoostingClassifier, ExtraTreesClassifier
@@ -142,7 +142,7 @@ y_train = train_data['Survived'].ravel()
 train_data = train_data.drop(['Survived'], axis=1)
 x_train = train_data.values 
 x_test = test_data.values
-"""
+
 #UNCOMMENT IF YOU WISH TO GENERATE FIRST-LEVEL PREDICTIONS.
 
 # Provide set of parameter distributions to be searched by RandomSearchCV
@@ -199,8 +199,32 @@ x_test_meta = np.concatenate((svc_fl_test,ada_fl_test,rf_fl_test,gb_fl_test,
                               et_fl_test), axis=1)
 np.savetxt('meta_train.txt', x_train_meta)
 np.savetxt('meta_test.txt', x_test_meta)
-"""
 
+"""
 # Load in first-level predictions for train/test sets. 
 x_train_meta = np.loadtxt('meta_train.txt')
 x_test_meta = np.loadtxt('meta_test.txt')
+"""
+
+# Provide set of parameter distributions to be searched for the second-level
+# xgboost model. 
+xgb_dist = {'learning_rate': scipy.stats.uniform(0.1,0.9), 'objective': ['reg:linear'],
+            'max_depth': scipy.stats.randint(2,7),
+            'subsample': [0.8], 'colsample_bytree': [0.8],
+            #'subsample': scipy.stats.uniform(0.5,0.9), 
+            #'colsample_bytree': scipy.stats.uniform(0.5,0.9), 
+            'min_child_weight': scipy.stats.randint(1,5),
+            'n_estimators': scipy.stats.randint(1,101)}
+
+# Generate second-level predictions using meta features. 
+xgb_params = hyperparameter_tuning(xgb.XGBClassifier,xgb_dist,50,x_train_meta,
+                                   y_train)
+xgb_clf = xgb.XGBClassifier(**xgb_params)
+xgb_clf.fit(x_train_meta, y_train)
+test_preds = xgb_clf.predict(x_test_meta)
+
+# Spit out predictions to submission file.
+submission = pd.DataFrame({"PassengerId": test_data['PassengerId'].astype(int),
+                           "Survived": test_preds.astype(int)})
+
+submission.to_csv('cjb_submission_v2.csv', index=False)
