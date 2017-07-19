@@ -12,6 +12,32 @@ from sklearn import preprocessing
 
 class Useful_Preprocessing(object):
     
+    def one_hot_encode(self, x, n_classes):
+       #One hot encode a list of sample labels. Return a one-hot encoded vector for each label.
+       #: x: List of sample Labels
+       #: return: Numpy array of one-hot encoded labels
+       return np.eye(n_classes)[x] 
+    
+    # Perform one hot encoding for all categorical variables, leaving numerical
+    # variables alone.
+    def all_ohe(self, data):
+        df_numeric = data.select_dtypes(exclude=['object'])
+        df_objects = data.select_dtypes(include=['object']).copy()
+        
+        for column in df_objects:
+            factorized_df = pd.factorize(df_objects[column])
+            f_values = factorized_df[0]
+            f_labels = list(factorized_df[1])
+            n_classes = len(f_labels)
+            
+            one_hot_encoded_features = self.one_hot_encode(f_values, n_classes)
+            ohe_features_df = pd.DataFrame(one_hot_encoded_features, columns=f_labels)
+            df_objects = df_objects.drop(column, axis=1)
+            df_objects = pd.concat([df_objects, ohe_features_df], axis=1)
+            
+        all_data = pd.concat([df_numeric, df_objects], axis=1)
+        return all_data
+    
     # Code performs three separate tasks:
     #   (1). Pull out the first letter of the cabin feature.
     #          Code taken from: https://www.kaggle.com/jeffd23/titanic/scikit-learn-ml-from-start-to-finish
@@ -27,8 +53,9 @@ class Useful_Preprocessing(object):
                          'F': 1, 'G': 1, 'T': 1}
         data['Cabin_Known'] = data.Cabin.map(cabin_mapping)
 
-        le = preprocessing.LabelEncoder().fit(data.Cabin)
-        data.Cabin = le.transform(data.Cabin)
+        # UNCOMMENT BELOW FOR LABEL ENCODING
+        #le = preprocessing.LabelEncoder().fit(data.Cabin)
+        #data.Cabin = le.transform(data.Cabin)
 
         return data
 
@@ -51,8 +78,9 @@ class Useful_Preprocessing(object):
         # Two missing values, assign the most common port of departure.
         data.Embarked = data.Embarked.fillna('S')
 
-        le = preprocessing.LabelEncoder().fit(data.Embarked)
-        data.Embarked = le.transform(data.Embarked)
+        # UNCOMMENT BELOW FOR LABEL ENCODING.
+        #le = preprocessing.LabelEncoder().fit(data.Embarked)
+        #data.Embarked = le.transform(data.Embarked)
 
         return data
 
@@ -66,11 +94,12 @@ class Useful_Preprocessing(object):
         data.Title = data.Title.replace('Ms', 'Miss')
         data.Title = data.Title.replace('Mme', 'Mrs')
 
+        # UNCOMMENT BELOW FOR LABEL ENCODING.
         # Map from strings to ordinal variables.
-        title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
+        #title_mapping = {"Mr": 1, "Miss": 2, "Mrs": 3, "Master": 4, "Rare": 5}
 
-        data.Title = data.Title.map(title_mapping)
-        data.Title = data.Title.fillna(0)
+        #data.Title = data.Title.map(title_mapping)
+        #data.Title = data.Title.fillna(0)
 
         return data
 
@@ -81,11 +110,12 @@ class Useful_Preprocessing(object):
     # Perform all feature transformations.
     def transform_all(self, data):
         data = self.simplify_cabins(data)
-        data = self.simplify_sex(data)
+        #data = self.simplify_sex(data)
         data = self.family_size(data)
         data = self.simplify_embark(data)
         data = self.add_title(data)
         data = self.drop_features(data)
+        data = self.all_ohe(data)
         return data
     
     # Impute missing ages using MICE.
