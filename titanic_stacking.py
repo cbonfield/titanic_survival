@@ -8,6 +8,7 @@
 ## Import statements 
 # General 
 #import re
+import sys
 import scipy 
 import numpy as np
 import pandas as pd
@@ -113,21 +114,30 @@ test_data['Fare'] = test_data['Fare'].fillna(test_data['Fare'].median())
 # just casting categorical features as numbers and dropping things we do not
 # wish to use).
 pp = Useful_Preprocessing()
-combined = pd.concat([train_data, test_data])
+combined = pd.concat([train_data, test_data], ignore_index=True)
 combined = pp.transform_all(combined)
-combined = pp.impute_ages(combined) # may not be permissible to do this on the
-                                    # training/test set simultaneously - need
-                                    # to read paper on MICE to be sure.
-                                    
+
 # Split back out into training/test sets. 
 train_data = combined[:891]
 test_data = combined[891:].drop('Survived', axis=1)
 
+# Split passenger IDs from training/test sets. 
+train_ids = train_data['PassengerId']
+train_data.drop(['PassengerId'], axis=1, inplace=True)
+test_ids = test_data['PassengerId']
+test_data.drop(['PassengerId'], axis=1, inplace=True)
+
+# Impute ages (was doing this previously with the combined train/test set, 
+# now doing separately). 
+train_data = pp.impute_ages(train_data) 
+test_data = pp.impute_ages(test_data) 
+
 # Standardize age/fare features. 
 scaler = preprocessing.StandardScaler()
-select = 'Age Fare'.split()
+select = 'Age Fare Parch SibSp Family_Size'.split()
 train_data[select] = scaler.fit_transform(train_data[select])
 test_data[select] = scaler.transform(test_data[select])
+#sys.exit(0)
 
 # Prepare for stacking (these parameters will be needed to generate out-of-fold
 # predictions). 
@@ -227,4 +237,4 @@ test_preds = xgb_clf.predict(x_test_meta)
 submission = pd.DataFrame({"PassengerId": test_data['PassengerId'].astype(int),
                            "Survived": test_preds.astype(int)})
 
-submission.to_csv('cjb_submission_v2.csv', index=False)
+submission.to_csv('cjb_submission_v3.csv', index=False)
