@@ -234,7 +234,7 @@ xgb_clf.fit(x_train_meta, y_train)
 test_preds = xgb_clf.predict(x_test_meta)
 
 # Spit out predictions to submission file.
-submission = pd.DataFrame({"PassengerId": test_data['PassengerId'].astype(int),
+submission = pd.DataFrame({"PassengerId": test_ids.astype(int),
                            "Survived": test_preds.astype(int)})
 
 submission.to_csv('cjb_submission_v3.csv', index=False)
